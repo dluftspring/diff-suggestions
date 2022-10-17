@@ -10,6 +10,10 @@ const token = core.getInput('github-token') || core.getInput('githubToken');
 const octokit = token && github.getOctokit(token);
 // @ts-ignore
 const GITHUB_EVENT = require(GITHUB_EVENT_PATH);
+// prefer git context number to input value
+const pull_request_number =
+  github.context.payload.pull_request?.number ||
+  core.getInput('pull_request_number');
 
 async function run(): Promise<void> {
   if (!octokit) {
@@ -17,9 +21,10 @@ async function run(): Promise<void> {
     return;
   }
 
-  if (!github.context.payload.pull_request) {
+  if (!pull_request_number) {
     core.debug('Requires a pull request');
-    return;
+    // don't supply a zero exit code if no PR number is passed
+    process.exit(1);
   }
   const commentBody =
     core.getInput('message') ||
