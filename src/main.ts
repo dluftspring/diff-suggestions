@@ -19,6 +19,7 @@ const commit_sha =
   GITHUB_EVENT?.pull_request?.head.sha || GITHUB_EVENT?.push?.head_commit;
 
 console.log('ACTIVE PR NUMBER IS: ', pull_request_number);
+console.log('COMMIT SHA FOR DIFF IS: ', commit_sha);
 
 async function run(): Promise<void> {
   if (!octokit) {
