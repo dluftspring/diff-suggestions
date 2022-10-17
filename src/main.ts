@@ -32,6 +32,10 @@ async function run(): Promise<void> {
     // don't supply a zero exit code if no PR number is passed
     core.setFailed('Pull request must be supplied for action to work');
   }
+  if (!commit_sha) {
+    core.debug('To post review comments we need the most recent commit sha');
+    core.setFailed('Unable to retrieve commit sha from github context');
+  }
   const commentBody =
     core.getInput('message') ||
     'Something magical has suggested this change for you';
