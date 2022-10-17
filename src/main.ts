@@ -15,7 +15,10 @@ const pull_request_number =
   github.context.payload.pull_request?.number ||
   +core.getInput('pull_request_number');
 
-core.debug(String(pull_request_number));
+const commit_sha =
+  GITHUB_EVENT?.pull_request?.head.sha || GITHUB_EVENT?.push?.head_commit;
+
+console.log('ACTIVE PR NUMBER IS: ', pull_request_number);
 
 async function run(): Promise<void> {
   if (!octokit) {
@@ -62,8 +65,8 @@ async function run(): Promise<void> {
       commentBody,
       gitDiff,
       // @ts-ignore
-      pullRequest: github.context.payload.pull_request?.number,
-      commitId: GITHUB_EVENT.pull_request?.head.sha,
+      pullRequest: pull_request_number,
+      commitId: commit_sha,
     });
   } catch (err) {
     core.setFailed(err);
