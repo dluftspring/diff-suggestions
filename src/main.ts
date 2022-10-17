@@ -13,9 +13,9 @@ const GITHUB_EVENT = require(GITHUB_EVENT_PATH);
 // prefer git context number to input value
 const pull_request_number =
   github.context.payload.pull_request?.number ||
-  core.getInput('pull_request_number');
+  +core.getInput('pull_request_number');
 
-core.debug(pull_request_number);
+console.log('ACTIVE PR NUMBER IS:', pull_request_number);
 
 async function run(): Promise<void> {
   if (!octokit) {
