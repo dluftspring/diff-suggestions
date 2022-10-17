@@ -15,7 +15,7 @@ const pull_request_number =
   github.context.payload.pull_request?.number ||
   +core.getInput('pull_request_number');
 
-console.log('ACTIVE PR NUMBER IS:', pull_request_number);
+core.debug(String(pull_request_number));
 
 async function run(): Promise<void> {
   if (!octokit) {
@@ -26,7 +26,7 @@ async function run(): Promise<void> {
   if (!pull_request_number) {
     core.debug('Requires a pull request');
     // don't supply a zero exit code if no PR number is passed
-    process.exit(1);
+    core.setFailed('Pull request must be supplied for action to work');
   }
   const commentBody =
     core.getInput('message') ||
