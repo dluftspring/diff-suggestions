@@ -78,7 +78,7 @@ async function run(): Promise<void> {
   if (!!gitDiff) {
     core.setFailed(
       new Error(
-        'There were some changed files, please update your PR with the code review suggestions'
+        'The linter has applied fixes, please update your PR with the code review suggestions'
       )
     );
   }
