@@ -15,6 +15,8 @@ const pull_request_number =
   github.context.payload.pull_request?.number ||
   core.getInput('pull_request_number');
 
+core.debug(pull_request_number);
+
 async function run(): Promise<void> {
   if (!octokit) {
     core.debug('No octokit client');
