@@ -179,13 +179,14 @@ const { owner, repo } = github.context.repo;
 const token = core.getInput('github-token') || core.getInput('githubToken');
 const octokit = token && github.getOctokit(token);
 // @ts-ignore
-const GITHUB_EVENT = require(GITHUB_EVENT_PATH);
+const eventPayload = require(GITHUB_EVENT_PATH);
 // prefer git context number to input value
 const pull_request_number = ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) ||
     +core.getInput('pull_request_number');
-console.log('ACTIVE PR NUMBER IS:', pull_request_number);
+const commit_sha = (eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head.sha) || (eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head_commit.id);
+console.debug('ACTIVE PR NUMBER IS: ', pull_request_number);
+console.debug('COMMIT SHA FOR DIFF IS: ', commit_sha);
 function run() {
-    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         if (!octokit) {
             core.debug('No octokit client');
@@ -194,7 +195,11 @@ function run() {
         if (!pull_request_number) {
             core.debug('Requires a pull request');
             // don't supply a zero exit code if no PR number is passed
-            process.exit(1);
+            core.setFailed('Pull request must be supplied for action to work');
+        }
+        if (!commit_sha) {
+            core.debug('To post review comments we need the most recent commit sha');
+            core.setFailed('Unable to retrieve commit sha from github context');
         }
         const commentBody = core.getInput('message') ||
             'Something magical has suggested this change for you';
@@ -226,8 +231,8 @@ function run() {
                 commentBody,
                 gitDiff,
                 // @ts-ignore
-                pullRequest: (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number,
-                commitId: (_b = GITHUB_EVENT.pull_request) === null || _b === void 0 ? void 0 : _b.head.sha,
+                pullRequest: pull_request_number,
+                commitId: commit_sha,
             });
         }
         catch (err) {
@@ -236,7 +241,7 @@ function run() {
         // If we have a git diff, then it means that some linter/formatter has changed some files, so
         // we should fail the build
         if (!!gitDiff) {
-            core.setFailed(new Error('There were some changed files, please update your PR with the code review suggestions'));
+            core.setFailed(new Error('The linter has applied fixes, please update your PR with the code review suggestions'));
         }
     });
 }
