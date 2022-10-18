@@ -9,17 +9,16 @@ const {owner, repo} = github.context.repo;
 const token = core.getInput('github-token') || core.getInput('githubToken');
 const octokit = token && github.getOctokit(token);
 // @ts-ignore
-const GITHUB_EVENT = require(GITHUB_EVENT_PATH);
+const eventPayload = require(GITHUB_EVENT_PATH);
 // prefer git context number to input value
 const pull_request_number =
   github.context.payload.pull_request?.number ||
   +core.getInput('pull_request_number');
 
-const commit_sha =
-  GITHUB_EVENT?.pull_request?.head.sha || GITHUB_EVENT?.push?.head_commit;
+const commit_sha = eventPayload?.head.sha || eventPayload?.head_commit.id;
 
-console.log('ACTIVE PR NUMBER IS: ', pull_request_number);
-console.log('COMMIT SHA FOR DIFF IS: ', commit_sha);
+console.debug('ACTIVE PR NUMBER IS: ', pull_request_number);
+console.debug('COMMIT SHA FOR DIFF IS: ', commit_sha);
 
 async function run(): Promise<void> {
   if (!octokit) {
