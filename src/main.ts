@@ -11,14 +11,14 @@ const octokit = token && github.getOctokit(token);
 // @ts-ignore
 const eventPayload = require(GITHUB_EVENT_PATH);
 // prefer git context number to input value
-const pull_request_number =
+const pullRequestNumber =
   github.context.payload.pull_request?.number ||
   +core.getInput('pull_request_number');
 
-const commit_sha = eventPayload?.head.sha || eventPayload?.head_commit.id;
+const commitSha = eventPayload?.head?.sha || eventPayload?.head_commit?.id;
 
-console.debug('ACTIVE PR NUMBER IS: ', pull_request_number);
-console.debug('COMMIT SHA FOR DIFF IS: ', commit_sha);
+core.debug(String(pullRequestNumber));
+core.debug(commitSha);
 
 async function run(): Promise<void> {
   if (!octokit) {
@@ -26,12 +26,12 @@ async function run(): Promise<void> {
     return;
   }
 
-  if (!pull_request_number) {
+  if (!pullRequestNumber) {
     core.debug('Requires a pull request');
     // don't supply a zero exit code if no PR number is passed
     core.setFailed('Pull request must be supplied for action to work');
   }
-  if (!commit_sha) {
+  if (!commitSha) {
     core.debug('To post review comments we need the most recent commit sha');
     core.setFailed('Unable to retrieve commit sha from github context');
   }
@@ -69,8 +69,8 @@ async function run(): Promise<void> {
       commentBody,
       gitDiff,
       // @ts-ignore
-      pullRequest: pull_request_number,
-      commitId: commit_sha,
+      pullRequest: pullRequestNumber,
+      commitId: commitSha,
     });
   } catch (err) {
     core.setFailed(err);

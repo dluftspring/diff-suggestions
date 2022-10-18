@@ -168,7 +168,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github = __importStar(__webpack_require__(5438));
 const core = __importStar(__webpack_require__(2186));
@@ -181,23 +181,23 @@ const octokit = token && github.getOctokit(token);
 // @ts-ignore
 const eventPayload = require(GITHUB_EVENT_PATH);
 // prefer git context number to input value
-const pull_request_number = ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) ||
+const pullRequestNumber = ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) ||
     +core.getInput('pull_request_number');
-const commit_sha = (eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head.sha) || (eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head_commit.id);
-console.debug('ACTIVE PR NUMBER IS: ', pull_request_number);
-console.debug('COMMIT SHA FOR DIFF IS: ', commit_sha);
+const commitSha = ((_b = eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head) === null || _b === void 0 ? void 0 : _b.sha) || ((_c = eventPayload === null || eventPayload === void 0 ? void 0 : eventPayload.head_commit) === null || _c === void 0 ? void 0 : _c.id);
+core.debug(String(pullRequestNumber));
+core.debug(commitSha);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!octokit) {
             core.debug('No octokit client');
             return;
         }
-        if (!pull_request_number) {
+        if (!pullRequestNumber) {
             core.debug('Requires a pull request');
             // don't supply a zero exit code if no PR number is passed
             core.setFailed('Pull request must be supplied for action to work');
         }
-        if (!commit_sha) {
+        if (!commitSha) {
             core.debug('To post review comments we need the most recent commit sha');
             core.setFailed('Unable to retrieve commit sha from github context');
         }
@@ -231,8 +231,8 @@ function run() {
                 commentBody,
                 gitDiff,
                 // @ts-ignore
-                pullRequest: pull_request_number,
-                commitId: commit_sha,
+                pullRequest: pullRequestNumber,
+                commitId: commitSha,
             });
         }
         catch (err) {
